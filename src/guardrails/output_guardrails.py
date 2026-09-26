@@ -39,14 +39,14 @@ def content_filter(response: str) -> dict:
     issues = []
     redacted = response
 
-    # PII and sensitive secret patterns to detect and redact
+    # PII and sensitive secret patterns to detect and redact (supports contiguous & spaced/obfuscated)
     PII_PATTERNS = {
         "phone": r"\b0\d{9,10}\b",
         "email": r"\b[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\b",
         "national_id": r"\b\d{12}\b|\b\d{9}\b",
-        "api_key": r"\bsk-[a-zA-Z0-9_-]+\b",
-        "password": r"password\s*(?:[:=]|is\s+)\s*[^\s,;]+|\badmin123\b",
-        "database_host": r"\bdb\.vinbank\.internal(?::\d+)?\b",
+        "api_key": r"\bs\s*[-_\s]*k\s*[-_\s]*-[a-zA-Z0-9_\s-]{8,}\b",
+        "password": r"password\s*(?:[:=]|is\s+)\s*[^\s,;]+|\ba\s*[-_\s]*d\s*[-_\s]*m\s*[-_\s]*i\s*[-_\s]*n\s*[-_\s]*1\s*[-_\s]*2\s*[-_\s]*3\b",
+        "database_host": r"\bd\s*b\s*\.\s*v\s*i\s*n\s*b\s*a\s*n\s*k\s*\.\s*i\s*n\s*t\s*e\s*r\s*n\s*a\s*l(?:\s*:\s*[\d\s]+)?\b",
     }
 
     for name, pattern in PII_PATTERNS.items():

@@ -96,6 +96,15 @@ def detect_injection(user_input: str) -> InputStatus:
         r"output\s+(your\s+|the\s+)?(system\s+prompt|instructions?|prompt|internal\s+password)",
         # Guardrail bypass attempts
         r"\bbypass\s+all\s+(rules|restrictions|guardrails|filters)\b",
+        # Infrastructure / Database topology exfiltration
+        r"\b(database\s+host(name)?|db\s*host|database\s*server|internal\s*host(name)?|connection\s*string)\b",
+        r"\b(hostname|database\s+url|backend\s+host)\b.*?\b(database|server|cluster|records?|vinbank|deposit)\b",
+        # Covert / Creative extraction framing (e.g. weave in, embed, insert)
+        r"\b(weave\s+in|embed|insert|include|blend|hide)\b.*?\b(hostname|database|credentials?|password|token|secret|api[_\s-]?key)\b",
+        # Evasion & Obfuscation formatting commands (e.g. spaces between chars, letter by letter)
+        r"\b(spelling|spell|format|write|output|separate|space)\b.*?\b(spaces?\s+between|character\s+by\s+character|hyphen\s+separated|delimiters?|letter\s+by\s+letter)\b",
+        r"\bspaces?\s+between\s+(each|every)\s+(character|letter|digit)\b",
+        r"\b(encode|convert)\b.*?\b(base64|rot13|hex|ascii|binary|morse)\b",
     ]
 
     for pattern in INJECTION_PATTERNS:
