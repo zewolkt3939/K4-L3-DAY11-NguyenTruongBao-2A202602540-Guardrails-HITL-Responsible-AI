@@ -1,5 +1,11 @@
 # Day 11 — Controlled Agent Security (2026)
 
+> **Thông tin học viên:**
+> - **Họ và tên:** Nguyễn Trường Bảo
+> - **MSSV:** 2A202602540
+> - **Repo:** `K4-L3-DAY11-NguyenTruongBao-2A202602540-Guardrails-HITL-Responsible-AI`
+> - **Lớp:** AI Thực Chiến - Khóa 4 - Level 3 (K4-L3)
+>
 > 👤 **Hình thức:** bài tập **cá nhân** (1 người / 1 MSSV).  
 > 🎯 **Mục tiêu:** xây **Blue** (phòng thủ), rồi red-team **Red** + **Red Advance**.  
 > ✅ Làm theo **Checkpoint 1 → 5** trong [`CHECKPOINTS.md`](CHECKPOINTS.md) · nộp theo [`SUBMISSION.md`](SUBMISSION.md).
