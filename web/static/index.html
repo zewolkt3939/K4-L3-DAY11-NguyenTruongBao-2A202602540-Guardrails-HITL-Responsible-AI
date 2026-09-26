@@ -3,182 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VinBank AI Security & Guardrails Console — Day 11</title>
+  <title>VinBank AI Security Chatbot — Day 11</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
+  <div class="app-container">
+    <!-- Header with Agent Switcher -->
     <header>
       <div class="logo-group">
-        <div class="logo-badge">🛡️</div>
+        <div class="logo-icon" id="headerLogoIcon">🛡️</div>
         <div class="logo-text">
-          <h1>VinBank AI Security Console</h1>
-          <p>Controlled Agent Security · Guardrails · Red Teaming (Day 11)</p>
+          <h1>VinBank Security Chat</h1>
+          <p id="headerSub">Chọn Agent bạn muốn tương tác</p>
         </div>
       </div>
-      <div class="system-status">
-        <div class="status-pill">
-          <span class="status-dot"></span>
-          <span>Red Model: OpenAI gpt-4o-mini</span>
-        </div>
-        <div class="status-pill" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-color: rgba(59, 130, 246, 0.25);">
-          <span>Blue Defense: Active</span>
-        </div>
+
+      <!-- Segmented Agent Tabs -->
+      <div class="agent-switcher" role="tablist">
+        <button class="agent-tab active blue" id="tabBlue" onclick="switchAgent('blue')">
+          <span>🛡️</span>
+          <span>Blue Agent (Phòng Thủ)</span>
+        </button>
+        <button class="agent-tab red" id="tabRed" onclick="switchAgent('red')">
+          <span>🔴</span>
+          <span>Red Agent (Mềm)</span>
+        </button>
+        <button class="agent-tab red_advance" id="tabAdvance" onclick="switchAgent('red_advance')">
+          <span>⚔️</span>
+          <span>Red Advance (Cứng)</span>
+        </button>
       </div>
+
+      <button class="clear-btn" onclick="clearChat()" title="Xóa lịch sử trò chuyện">
+        🗑️
+      </button>
     </header>
 
-    <main class="main-layout">
-      <!-- Input Section -->
-      <section class="input-section">
-        <div class="section-title">
-          <h2><span>⚡</span> Nhập Prompt Kiểm Thử (Live Evaluation)</h2>
-          <span class="hint-text">Nhấn <strong>Ctrl + Enter</strong> để gửi nhanh</span>
-        </div>
+    <!-- Persona & Mission Context Banner -->
+    <div class="agent-banner banner-blue" id="agentBanner">
+      <span id="bannerText">
+        🛡️ <strong>Blue Agent (VinBank Assistant):</strong> Có bộ lọc Input & Output Guardrails bảo vệ. Không bao giờ để lộ mật khẩu, tự động che giấu PII và chặn injection.
+      </span>
+      <span style="font-family: var(--font-mono); font-size: 0.72rem; opacity: 0.8;" id="bannerBadge">GUARDRAILS: ACTIVE</span>
+    </div>
 
-        <!-- Quick Prompts Pills -->
-        <div class="quick-prompts">
-          <button class="prompt-btn" onclick="setPrompt(0)">
-            🟢 Hỏi lãi suất (Hợp lệ)
-          </button>
-          <button class="prompt-btn attack" onclick="setPrompt(1)">
-            🔴 Prompt Injection (Classic)
-          </button>
-          <button class="prompt-btn attack" onclick="setPrompt(2)">
-            🎭 Social Engineering (Runbook Leak)
-          </button>
-          <button class="prompt-btn attack" onclick="setPrompt(3)">
-            🔍 Đòi cấu hình YAML (Reformat)
-          </button>
-          <button class="prompt-btn" onclick="setPrompt(4)">
-            🍰 Lạc đề (Ngoại vi nghiệp vụ)
-          </button>
-        </div>
+    <!-- Chat Messages Scroll Area -->
+    <div class="chat-window" id="chatWindow">
+      <!-- Messages dynamically populated by app.js -->
+    </div>
 
-        <div class="textarea-wrapper">
-          <textarea id="promptInput" placeholder="Nhập câu prompt người dùng hoặc kịch bản tấn công jailbreak vào đây..."></textarea>
-        </div>
+    <!-- Quick Suggestion Chips (Dynamic by Agent) -->
+    <div class="quick-chips" id="quickChips">
+      <!-- Chips populated by app.js -->
+    </div>
 
-        <div class="actions-bar">
-          <span id="timingInfo" class="hint-text">Sẵn sàng kiểm thử</span>
-          <button id="sendBtn" class="send-btn" onclick="runEvaluation()">
-            <span id="btnIcon">🚀</span>
-            <span id="btnText">Chạy Kiểm Thử</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- Results Matrix Grid -->
-      <section id="resultsSection" class="results-grid" style="display: none;">
-        <!-- Card 1: Blue Guardrails -->
-        <div class="result-card" id="cardBlue">
-          <div class="card-header">
-            <div class="card-title">
-              <span style="font-size: 20px;">🛡️</span>
-              <h3>Blue Guardrails (Bộ Lọc Bạn Viết)</h3>
-            </div>
-            <span id="badgeBlue" class="card-badge">Đang chạy</span>
-          </div>
-          <div class="card-body">
-            <div class="metric-item">
-              <span class="metric-label">Phát hiện Injection</span>
-              <span id="valInjection" class="metric-val">—</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Lọc chủ đề (Topic Filter)</span>
-              <span id="valTopic" class="metric-val">—</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Thời gian lọc đầu vào</span>
-              <span id="valBlueLatency" class="metric-val">—</span>
-            </div>
-            <div id="blueReasonsBox" class="response-box" style="display: none;"></div>
-          </div>
-        </div>
-
-        <!-- Card 2: Red Agent (Default Soft Model) -->
-        <div class="result-card" id="cardRed">
-          <div class="card-header">
-            <div class="card-title">
-              <span style="font-size: 20px;">🔴</span>
-              <h3>Red Agent (Mục Tiêu Tấn Công)</h3>
-            </div>
-            <span id="badgeRed" class="card-badge">Đang chạy</span>
-          </div>
-          <div class="card-body">
-            <div id="redLeakedAlert" class="leaked-alert" style="display: none;">
-              <div class="leaked-title">🚨 BỊ LỪA LỘ SECRET (Tấn công thành công!)</div>
-              <div id="redLeakedDetails"></div>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Model thực tế</span>
-              <span class="metric-val" style="color: #cbd5e1;">gpt-4o-mini (Live)</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Độ trễ API</span>
-              <span id="valRedLatency" class="metric-val">—</span>
-            </div>
-            <div class="response-box" id="redResponseBox">Đang chờ...</div>
-          </div>
-        </div>
-
-        <!-- Card 3: Red Advance Agent -->
-        <div class="result-card" id="cardAdvance">
-          <div class="card-header">
-            <div class="card-title">
-              <span style="font-size: 20px;">🛡️</span>
-              <h3>Red Advance (Agent Phòng Thủ Mạnh)</h3>
-            </div>
-            <span id="badgeAdvance" class="card-badge">Đang chạy</span>
-          </div>
-          <div class="card-body">
-            <div class="metric-item">
-              <span class="metric-label">Cơ chế xử lý</span>
-              <span id="valAdvanceLayer" class="metric-val" style="color: #60a5fa;">—</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Trạng thái bảo vệ</span>
-              <span id="valAdvanceStatus" class="metric-val val-allow">AN TOÀN</span>
-            </div>
-            <div class="response-box" id="advanceResponseBox">Đang chờ...</div>
-          </div>
-        </div>
-
-        <!-- Card 4: Output Guardrails & Egress -->
-        <div class="result-card" id="cardOutput">
-          <div class="card-header">
-            <div class="card-title">
-              <span style="font-size: 20px;">🧹</span>
-              <h3>Output Guardrails & Egress Gateway</h3>
-            </div>
-            <span id="badgeOutput" class="card-badge badge-success">Sẵn sàng</span>
-          </div>
-          <div class="card-body">
-            <div class="metric-item">
-              <span class="metric-label">Kiểm duyệt PII & Secret</span>
-              <span id="valSanitizeStatus" class="metric-val val-allow">CLEAN</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Egress Gateway (Chặn tuồn data)</span>
-              <span id="valEgressStatus" class="metric-val val-allow">ALLOWED</span>
-            </div>
-            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
-              Bản đã che giấu (Redacted output) gửi tới khách hàng:
-            </div>
-            <div class="response-box mono" id="redactedResponseBox"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Empty State -->
-      <section id="emptyState" class="empty-state">
-        <div class="empty-icon">🔬</div>
-        <p>Chọn một câu hỏi mẫu ở trên hoặc tự gõ prompt vào ô nhập rồi nhấn <strong>Chạy Kiểm Thử</strong>.</p>
-      </section>
-    </main>
+    <!-- Input Box -->
+    <div class="input-container">
+      <textarea id="chatInput" placeholder="Nhập câu hỏi hoặc câu prompt tấn công... (Nhấn Enter để gửi, Shift+Enter xuống dòng)" rows="1"></textarea>
+      <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()" title="Gửi tin nhắn">
+        ➤
+      </button>
+    </div>
   </div>
 
   <script src="/static/app.js"></script>
